@@ -3,6 +3,7 @@
 This project is a low-level C implementation of a client-server architecture capable of processing specific system commands and returning their outputs to the client. The primary goal of this project is to demonstrate advanced system programming concepts, including socket programming, I/O multiplexing, concurrency (multi-threading), and strict memory management.
 ### Protocol & Message Structure
 The communication relies on a custom, strictly-defined binary application-layer protocol. This ensures predictable data parsing over stream sockets.
+
 **Request Format:**
  * REQ_LEN (2 Bytes): Total length of the request (Header + Argument).
  * REQ_TYPE (2 Bytes): Type of the command requested.
@@ -16,6 +17,7 @@ The communication relies on a custom, strictly-defined binary application-layer 
  * RESPONSE_LEN (2 Bytes): Total length of the response message (Header + Data).
  * RESPONSE_DATA (Variable): The output string or file content returned by the server.
 The project is divided into two distinct phases to compare different networking and concurrency models.
+
 ## 🏗️ Part 1: Single-Threaded & I/O Multiplexing
 ### Architecture & Approach
 In this phase, the server operates on a **Single-Threaded** architecture using **UNIX Domain Sockets** (AF_UNIX). Instead of creating a new process or thread for every client, it handles concurrent connections using **I/O Multiplexing**.

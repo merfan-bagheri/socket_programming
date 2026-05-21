@@ -9,10 +9,12 @@ The communication relies on a custom, strictly-defined binary application-layer 
  * REQ_TYPE (2 Bytes): Type of the command requested.
  * REQ_ARG_LEN (2 Bytes): Length of the argument string.
  * REQ_ARG (Variable): The actual argument data (e.g., directory path or file name).
+   
 **Supported Commands (REQ_TYPE):**
  * REQUEST_TYPE_LS (1): Executes ls (lists directory contents) and returns the output.
  * REQUEST_TYPE_PWD (2): Executes pwd (prints working directory) and returns the output.
  * REQUEST_TYPE_CAT (3): Executes cat <file> (reads file contents) and returns the output.
+   
 **Response Format:**
  * RESPONSE_LEN (2 Bytes): Total length of the response message (Header + Data).
  * RESPONSE_DATA (Variable): The output string or file content returned by the server.

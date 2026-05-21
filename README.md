@@ -92,6 +92,18 @@ By introducing a slight artificial processing delay (usleep) to simulate heavy d
  1. **Single-Threaded Server (Part 1 - I/O Multiplexing):**
    * *Throughput:* Extremely fast for lightweight, non-blocking tasks.
    * *Limitation:* Highly vulnerable to **Blocking I/O**. Because there is only one thread, if one client requests a massive file via cat, the entire server blocks. Subsequent clients time out, causing the throughput to drop to near zero.
+     
+```
+**Execution:**
+Start the server first, then run the client with desired commands.
+```bash
+./server
+# In another terminal:
+./client pwd
+./client ls /var
+./client cat /etc/passwd
+
+```
  2. **Multi-Threaded Server (Part 2 - TCP):**
    * *Throughput:* High, but carries slight overhead due to OS thread creation and context switching.
    * *Limitation:* It perfectly isolates blocking operations (a heavy cat request doesn't block other clients). However, under extreme load (e.g., 2000+ concurrent clients), it hits the **C10K Problem**. The OS runs out of file descriptors (hitting the ulimit) or thread stack memory, leading to Too many open files errors and dropped connections.

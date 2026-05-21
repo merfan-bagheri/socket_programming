@@ -93,20 +93,21 @@ By introducing a slight artificial processing delay (usleep) to simulate heavy d
    * *Throughput:* Extremely fast for lightweight, non-blocking tasks.
    * *Limitation:* Highly vulnerable to **Blocking I/O**. Because there is only one thread, if one client requests a massive file via cat, the entire server blocks. Subsequent clients time out, causing the throughput to drop to near zero.
      
-```
 **Execution:**
-Start the server first, then run the client with desired commands.
+Run the stress test for unix mode.
 ```bash
-./server
-# In another terminal:
-./client pwd
-./client ls /var
-./client cat /etc/passwd
-
+​python3 stress_test.py --mode unix --clients 200 --requests 10000
 ```
  2. **Multi-Threaded Server (Part 2 - TCP):**
    * *Throughput:* High, but carries slight overhead due to OS thread creation and context switching.
    * *Limitation:* It perfectly isolates blocking operations (a heavy cat request doesn't block other clients). However, under extreme load (e.g., 2000+ concurrent clients), it hits the **C10K Problem**. The OS runs out of file descriptors (hitting the ulimit) or thread stack memory, leading to Too many open files errors and dropped connections.
+
+**Execution:**
+Run the stress test for tcp mode.
+```bash
+​python3 stress_test.py --mode tcp --clients 200 --requests 10000
+```
+
 ## ❓ Technical Q&A
 **1. How does I/O Multiplexing work to handle multiple sockets in a single thread?**
 I/O Multiplexing (via select()) allows the OS to monitor a set of file descriptors (sockets) and block the thread until at least one becomes "ready" (e.g., data has arrived or the buffer is free to write). Instead of sequentially waiting on read() for one client and ignoring others, the single thread asks the OS: *"Wake me up when ANY of these clients have data."* Once awake, it loops through the ready sockets, processes the available chunks of data, and goes back to monitoring, effectively multitasking without multi-threading.

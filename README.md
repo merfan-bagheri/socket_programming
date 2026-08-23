@@ -1,4 +1,4 @@
-# ?? High-Performance Client-Server Systems Programming in C
+# 🚀 High-Performance Client-Server Systems Programming in C
 
 [![C](https://img.shields.io/badge/Language-C99-A8B9CC?logo=c&logoColor=white)](https://en.wikipedia.org/wiki/C_(programming_language))
 [![Linux](https://img.shields.io/badge/Platform-Linux%20Kernel-FCC624?logo=linux&logoColor=black)](https://www.kernel.org/)
@@ -7,11 +7,11 @@
 [![Throughput](https://img.shields.io/badge/Throughput-3000%2B%20req%2Fsec-success)](https://github.com/merfan-bagheri/socket_programming)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-> **Author**: Muhammaderfan Bagherinejad ([GitHub](https://github.com/merfan-bagheri) ? [LinkedIn](https://www.linkedin.com/in/merfan-bagheri))
+> **Author**: Muhammaderfan Bagherinejad ([GitHub](https://github.com/merfan-bagheri) • [LinkedIn](https://www.linkedin.com/in/merfan-bagheri))
 
 ---
 
-## ?? Overview
+## 📖 Overview
 
 A low-level, high-throughput C client-server systems architecture implementing:
 1. **Phase 1: Asynchronous Event-Driven Single-Threaded Server** (`select()` I/O Multiplexing over UNIX Domain Sockets).
@@ -39,7 +39,7 @@ graph TD
 
 ---
 
-## ?? Benchmark & Performance Comparison
+## 📊 Benchmark & Performance Comparison
 
 Benchmarked on **Ubuntu Linux (Kernel 5.15, GCC 11.4 -O3)** using a Python multi-worker stress tester under concurrent traffic:
 
@@ -56,7 +56,7 @@ Benchmarked on **Ubuntu Linux (Kernel 5.15, GCC 11.4 -O3)** using a Python multi
 
 ---
 
-## ?? Protocol & Message Framing Specification
+## 📡 Protocol & Message Framing Specification
 
 All communications are strictly packed in network byte order (**Big Endian**) to prevent byte-alignment ambiguities and partial stream corruptions.
 
@@ -85,37 +85,37 @@ All communications are strictly packed in network byte order (**Big Endian**) to
 
 ---
 
-## ?? Repository Hierarchy
+## 📂 Repository Hierarchy
 
 ```
 socket_programming/
-??? Makefile                    # Root orchestration Makefile
-??? phase_1/                    # Phase 1: UNIX Domain + select() I/O Multiplexing
-?   ??? Makefile
-?   ??? common.h
-?   ??? server.c
-?   ??? client.c
-?   ??? stress_test.py
-??? phase_2/                    # Phase 2: TCP Multi-Threaded Server (pthreads)
-?   ??? Makefile
-?   ??? common.h
-?   ??? server.c
-?   ??? client.c
-?   ??? stress_test.py
-??? tests/                      # Automated End-to-End & Valgrind Test Suite
-?   ??? run_tests.sh
-??? references/                 # Core POSIX socket references & specification docs
-?   ??? C Recruitment Task.pdf
-?   ??? cs556-3rd-tutorial.pdf
-?   ??? sockbookv2_1.pdf
-??? .gitignore
-??? LICENSE
-??? README.md
+├── Makefile                    # Root orchestration Makefile
+├── phase_1/                    # Phase 1: UNIX Domain + select() I/O Multiplexing
+│   ├── Makefile
+│   ├── common.h
+│   ├── server.c
+│   ├── client.c
+│   └── stress_test.py
+├── phase_2/                    # Phase 2: TCP Multi-Threaded Server (pthreads)
+│   ├── Makefile
+│   ├── common.h
+│   ├── server.c
+│   ├── client.c
+│   └── stress_test.py
+├── tests/                      # Automated End-to-End & Valgrind Test Suite
+│   └── run_tests.sh
+├── references/                 # Core POSIX socket references & specification docs
+│   ├── C Recruitment Task.pdf
+│   ├── cs556-3rd-tutorial.pdf
+│   └── sockbookv2_1.pdf
+├── .gitignore
+├── LICENSE
+└── README.md
 ```
 
 ---
 
-## ??? Build, Run & Test
+## 🛠️ Build, Run & Test
 
 ### 1. Compile Everything
 ```bash
@@ -132,7 +132,7 @@ Executes functional command tests (`pwd`, `ls`, `cat`), Python concurrency stres
 
 ---
 
-## ?? Manual Execution
+## 💻 Manual Execution
 
 ### Phase 1: UNIX Domain Sockets
 ```bash
@@ -158,7 +158,7 @@ cd phase_2
 
 ---
 
-## ?? Memory Leak Safety Verification (Valgrind)
+## 🧪 Memory Leak Safety Verification (Valgrind)
 
 ```bash
 valgrind --leak-check=full --show-leak-kinds=all ./server
@@ -175,5 +175,5 @@ ERROR SUMMARY: 0 errors from 0 contexts
 
 ---
 
-## ?? License
+## 📜 License
 Distributed under the [MIT License](LICENSE).

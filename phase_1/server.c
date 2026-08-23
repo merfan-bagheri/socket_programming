@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,9 +24,8 @@ volatile sig_atomic_t keep_running = 1;
  * Sets the global lifecycle loop condition flag to false.
  */
 void sig_handler(int signo) {
-    if (signo == SIGINT || signo == SIGTERM) {
-        keep_running = 0;
-    }
+    (void)signo;
+    keep_running = 0;
 }
 
 /* Struct tracking the state, protocol reading block, and outgoing data for each client */
@@ -73,7 +73,7 @@ void enqueue(RequestQueue* q, int client_fd, uint16_t type, const char* arg) {
     newNode->req_type = type;
     memset(newNode->arg, 0, sizeof(newNode->arg));
     if (arg != NULL) {
-        strncpy(newNode->arg, arg, sizeof(newNode->arg) - 1);
+        snprintf(newNode->arg, sizeof(newNode->arg), "%s", arg);
     }
     newNode->next = NULL;
 
@@ -127,9 +127,11 @@ char* execute_command(uint16_t type, const char* arg, size_t* out_len) {
     if (type == REQUEST_TYPE_PWD) {
         char cwd[1024];
         if (getcwd(cwd, sizeof(cwd)) != NULL) {
-            *out_len = strlen(cwd) + 1; 
+            *out_len = strlen(cwd) + 1; // including '\n'
             output = malloc(*out_len + 1);
-            if (output) snprintf(output, *out_len + 1, "%s\n", cwd);
+            if (output) {
+                snprintf(output, *out_len + 1, "%s\n", cwd);
+            }
         } else {
             output = strdup("Error: getcwd failed\n");
             *out_len = strlen(output);
@@ -155,7 +157,9 @@ char* execute_command(uint16_t type, const char* arg, size_t* out_len) {
                     if (current_len + name_len + 2 > capacity) {
                         capacity *= 2;
                         char* temp = realloc(output, capacity);
-                        if (!temp) break; // Handle realloc failure
+                        if (!temp) {
+                            break; // Handle realloc failure
+                        }
                         output = temp;
                     }
                     memcpy(output + current_len, ent->d_name, name_len);
@@ -179,8 +183,13 @@ char* execute_command(uint16_t type, const char* arg, size_t* out_len) {
             if (fd >= 0) {
                 struct stat st;
                 if (fstat(fd, &st) == 0) {
-                    /* Restrict processing targets that exceed the protocol limits */
-                    if (st.st_size + sizeof(ResponseHeader) > 65535) {
+                    /* Handle empty files gracefully */
+                    if (st.st_size == 0) {
+                        output = malloc(1);
+                        if (output) output[0] = '\0';
+                        *out_len = 0;
+                    } else if (st.st_size + sizeof(ResponseHeader) > 65535) {
+                        /* Restrict processing targets that exceed the protocol limits */
                         output = strdup("Error: File is too large (exceeds 64KB limit)\n");
                         *out_len = strlen(output);
                     } else {
@@ -198,6 +207,9 @@ char* execute_command(uint16_t type, const char* arg, size_t* out_len) {
                             }
                         }
                     }
+                } else {
+                    output = strdup("Error: Cannot stat file\n");
+                    *out_len = strlen(output);
                 }
                 close(fd);
             } else {
@@ -227,13 +239,17 @@ int main() {
     fd_set readfds, writefds;
     RequestQueue req_queue = {NULL, NULL};
 
-    /* Register operational system handlers for signal monitoring */
-    signal(SIGINT, sig_handler);
-    signal(SIGTERM, sig_handler);
+    /* Register operational system handlers using sigaction to prevent SA_RESTART */
+    struct sigaction sa;
+    sa.sa_handler = sig_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sigaction(SIGINT, &sa, NULL);
+    sigaction(SIGTERM, &sa, NULL);
     signal(SIGPIPE, SIG_IGN); /* Prevent termination if writing to broken pipe */
 
     /* Instantiate an internal Local UNIX IPC streaming socket */
-    if ((server_fd = socket(AF_UNIX, SOCK_STREAM, 0)) == 0) {
+    if ((server_fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
         perror("Socket creation failed");
         exit(EXIT_FAILURE);
     }
@@ -241,8 +257,9 @@ int main() {
     set_nonblocking(server_fd);
 
     struct sockaddr_un address;
+    memset(&address, 0, sizeof(address));
     address.sun_family = AF_UNIX;
-    strncpy(address.sun_path, SOCKET_PATH, sizeof(address.sun_path) - 1);
+    snprintf(address.sun_path, sizeof(address.sun_path), "%s", SOCKET_PATH);
     unlink(SOCKET_PATH); /* Remove existing lingering UNIX domain sockets */
 
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
@@ -256,6 +273,9 @@ int main() {
         close(server_fd);
         exit(EXIT_FAILURE);
     }
+
+    printf("UNIX Domain Server listening on %s\n", SOCKET_PATH);
+    printf("Press Ctrl+C to stop the server gracefully.\n");
 
     /* Core execution loop driven by multiplexed socket event processing */
     while (keep_running) {
@@ -333,7 +353,7 @@ int main() {
             tv.tv_sec = 0;
             tv.tv_usec = 0; // Return immediately (polling mode)
             tv_ptr = &tv;
-        } // If queue is empty, tv_ptr remains NULL causing select() to block indefinitely
+        }
 
         /* Multiplexed synchronous I/O barrier blocking execution waiting for activity */
         int activity = select(max_sd + 1, &readfds, &writefds, NULL, tv_ptr);
@@ -344,9 +364,9 @@ int main() {
         /* Manage entry validations processing incoming node connections */
         if (FD_ISSET(server_fd, &readfds)) {
             if ((new_socket = accept(server_fd, NULL, NULL)) >= 0) {
-                // Enforce FD_SETSIZE limit to prevent crash
+                // Enforce FD_SETSIZE limit to prevent select buffer overflow
                 if (new_socket >= FD_SETSIZE) {
-                    fprintf(stderr, "Error: Max FD limit reached. Cannot accept new client.\n");
+                    fprintf(stderr, "Error: Max FD limit reached (%d >= %d). Cannot accept new client.\n", new_socket, FD_SETSIZE);
                     close(new_socket);
                 } else {
                     set_nonblocking(new_socket); 
@@ -359,7 +379,9 @@ int main() {
                             break;
                         }
                     }
-                    if (!added) close(new_socket); 
+                    if (!added) {
+                        close(new_socket); 
+                    }
                 }
             }
         }
@@ -450,6 +472,7 @@ int main() {
     }
 
     /* Post-shutdown server lifecycle cleaning steps */
+    printf("\nShutting down server gracefully...\n");
     for (int i = 0; i < MAX_CLIENTS; i++) {
         disconnect_client(&clients[i]);
     }
@@ -466,3 +489,4 @@ int main() {
 
     return 0;
 }
+

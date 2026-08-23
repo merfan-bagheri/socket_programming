@@ -8,7 +8,7 @@
 [![Throughput](https://img.shields.io/badge/Throughput-~4000%20req%2Fsec-success)](https://github.com/merfan-bagheri/socket_programming)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-> **Author**: Muhammaderfan Bagherinejad ([GitHub](https://github.com/merfan-bagheri) • [LinkedIn](https://www.linkedin.com/in/merfan-bagheri))
+> **Author**: Muhammaderfan Bagherinejad ([GitHub](https://github.com/merfan-bagheri) • [LinkedIn](https://www.linkedin.com/in/mohammaderfan-bagherinejad))
 
 ---
 

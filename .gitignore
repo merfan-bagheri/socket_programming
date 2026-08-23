@@ -1,0 +1,16 @@
+﻿# Compiled Binaries & Objects
+*.o
+*.out
+server
+client
+*.socket
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# OS Artifacts
+.DS_Store
+Thumbs.db

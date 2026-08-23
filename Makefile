@@ -1,6 +1,8 @@
-﻿all:
-	$(MAKE) -C phase_1
-	$(MAKE) -C phase_2
+CC ?= gcc
+
+all:
+	$(MAKE) -C phase_1 CC="$(CC)"
+	$(MAKE) -C phase_2 CC="$(CC)"
 
 clean:
 	$(MAKE) -C phase_1 clean

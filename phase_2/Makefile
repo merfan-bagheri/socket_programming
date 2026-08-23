@@ -1,5 +1,5 @@
-CC = gcc
-CFLAGS = -Wall -Wextra -Werror -pedantic -O3 -pthread -std=c99
+CC ?= gcc
+CFLAGS = -Wall -Wextra -pedantic -O3 -pthread -std=c99
 DEBUG_CFLAGS = -Wall -Wextra -pedantic -g -O0 -pthread -fsanitize=address -std=c99
 
 all: server client

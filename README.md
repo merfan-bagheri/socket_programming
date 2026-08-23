@@ -1,5 +1,6 @@
 # 🚀 High-Performance Client-Server Systems Programming in C
 
+[![C/C++ CI](https://github.com/merfan-bagheri/socket_programming/actions/workflows/ci.yml/badge.svg)](https://github.com/merfan-bagheri/socket_programming/actions/workflows/ci.yml)
 [![C](https://img.shields.io/badge/Language-C99-A8B9CC?logo=c&logoColor=white)](https://en.wikipedia.org/wiki/C_(programming_language))
 [![Linux](https://img.shields.io/badge/Platform-Linux%20Kernel-FCC624?logo=linux&logoColor=black)](https://www.kernel.org/)
 [![POSIX Threads](https://img.shields.io/badge/Concurrency-POSIX%20pthreads-informational)](https://man7.org/linux/man-pages/man7/pthreads.7.html)

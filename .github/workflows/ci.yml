@@ -1,0 +1,39 @@
+name: C/C++ Systems CI & Memory Safety
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    name: Build & Test (${{ matrix.compiler }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind python3 ${{ matrix.compiler }}
+
+      - name: Strict Compilation (-Wall -Wextra -Werror -pedantic -O3)
+        run: |
+          make clean
+          make all CC=${{ matrix.compiler }}
+
+      - name: Execute End-to-End & Memory Leak Test Suite
+        run: |
+          bash tests/run_tests.sh
+
+      - name: Run Statistical Benchmark Suite
+        run: |
+          python3 tests/benchmark_suite.py

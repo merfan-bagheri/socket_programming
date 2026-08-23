@@ -4,7 +4,7 @@
 [![Linux](https://img.shields.io/badge/Platform-Linux%20Kernel-FCC624?logo=linux&logoColor=black)](https://www.kernel.org/)
 [![POSIX Threads](https://img.shields.io/badge/Concurrency-POSIX%20pthreads-informational)](https://man7.org/linux/man-pages/man7/pthreads.7.html)
 [![Valgrind Verified](https://img.shields.io/badge/Memory%20Safety-0%20Leaks%20(Valgrind)-brightgreen)](https://valgrind.org/)
-[![Throughput](https://img.shields.io/badge/Throughput-3000%2B%20req%2Fsec-success)](https://github.com/merfan-bagheri/socket_programming)
+[![Throughput](https://img.shields.io/badge/Throughput-~4000%20req%2Fsec-success)](https://github.com/merfan-bagheri/socket_programming)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 > **Author**: Muhammaderfan Bagherinejad ([GitHub](https://github.com/merfan-bagheri) • [LinkedIn](https://www.linkedin.com/in/merfan-bagheri))
@@ -39,18 +39,20 @@ graph TD
 
 ---
 
-## 📊 Benchmark & Performance Comparison
+## 📊 Benchmark & Performance Evaluation
 
-Benchmarked on **Ubuntu Linux (Kernel 5.15, GCC 11.4 -O3)** using a Python multi-worker stress tester under concurrent traffic:
+Empirically evaluated on **Ubuntu Linux (Kernel 5.15, GCC 11.4 -O3)** using automated multi-trial stress testing (**5 independent benchmark trials**, 100 concurrent worker threads, 10,000 total requests per architecture):
 
 | Metric | Phase 1 (UNIX Domain / `select`) | Phase 2 (Multi-Threaded TCP / `pthreads`) |
 | :--- | :--- | :--- |
 | **Transport** | `AF_UNIX` (Local IPC Socket) | `AF_INET` (TCP Socket on `:8080`) |
 | **Concurrency Model** | Single-threaded Non-Blocking I/O Multiplexing | Multi-threaded POSIX Thread-per-Client |
-| **Peak Throughput** | **~3,103 requests / sec** | **~3,013 requests / sec** |
-| **Average Latency** | **6.50 ms** | **9.10 ms** |
-| **Success Rate (100 workers, 1k reqs)** | **100% (1000/1000)** | **100% (1000/1000)** |
-| **Memory Leaks (Valgrind)** | **0 bytes in 0 blocks** | **0 bytes in 0 blocks** |
+| **Mean Throughput (5 trials)** | **2,805.31 ± 827.63 req / sec** | **3,953.55 ± 146.75 req / sec** |
+| **Average Latency (Mean ± Std)** | **17.29 ± 5.39 ms** | **12.07 ± 2.18 ms** |
+| **95th Percentile Latency (p95)** | **48.98 ms** | **33.32 ms** |
+| **99th Percentile Latency (p99)** | **73.74 ms** | **50.87 ms** |
+| **Success Rate (10,000 requests)** | **100.00% (10,000 / 10,000)** | **100.00% (10,000 / 10,000)** |
+| **Memory Safety (Valgrind)** | **0 bytes in 0 blocks** (Clean) | **0 bytes in 0 blocks** (Clean) |
 | **Memory Isolation** | Single-process memory address space | Shared process space with dynamic stack per thread |
 | **Blocking Task Sensitivity** | Vulnerable to Head-of-Line disk I/O | Fully isolated across independent worker threads |
 
@@ -102,8 +104,9 @@ socket_programming/
 │   ├── server.c
 │   ├── client.c
 │   └── stress_test.py
-├── tests/                      # Automated End-to-End & Valgrind Test Suite
-│   └── run_tests.sh
+├── tests/                      # Automated End-to-End & Benchmark Test Suite
+│   ├── run_tests.sh            # Functional & Valgrind integration runner
+│   └── benchmark_suite.py      # Statistical multi-trial benchmark suite
 ├── references/                 # Core POSIX socket references & specification docs
 │   ├── C Recruitment Task.pdf
 │   ├── cs556-3rd-tutorial.pdf
@@ -128,7 +131,11 @@ make all
 ```bash
 make test
 ```
-Executes functional command tests (`pwd`, `ls`, `cat`), Python concurrency stress tests (100 concurrent workers), and Valgrind memory leak assertions.
+
+### 3. Run Statistical Benchmark Suite
+```bash
+python3 tests/benchmark_suite.py
+```
 
 ---
 
